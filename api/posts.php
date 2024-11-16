@@ -10,7 +10,7 @@ $db = $database->getConnection();
 
 $query = "SELECT 
     posts.post_id, 
-    users.username, 
+    users.name, 
     users.profile_picture, 
     moods.mood_category, 
     posts.content AS description, 
