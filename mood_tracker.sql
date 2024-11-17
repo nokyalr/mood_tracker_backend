@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 16, 2024 at 01:41 PM
+-- Generation Time: Nov 17, 2024 at 02:18 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -200,10 +200,10 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `username`, `name`, `password`, `profile_picture`, `created_at`) VALUES
-(1, 'anniey', 'Anniey Flare', '$2y$10$cZf.6RS.TjFFgDdp3sFTneWWDD4cRM.a/fUesnh6uEG.PlKH9TK8m', 'assets/images/people1.png', '2024-11-16 05:47:27'),
+(1, 'anniey', 'Anniey Flare', '$2y$10$ZDPK7N5ys4brPgK0BG21Du57IMQVzgS4mfJ/A9J21jHfjM.0OYOt2', 'assets/images/people4.png', '2024-11-16 05:47:27'),
 (2, 'stevia_', 'Stevia Wize', '$2y$10$vHfUZRAmUAfAZlwkkxTTduNssOPC9lEOfGl5lwknBD3YCpxvyiG.q', 'assets/images/people5.png', '2024-11-16 05:47:27'),
 (3, 'mar_lize', 'Marlize Abraham', '$2y$10$lgUx74f8R87MEvWTfAsUiuwjdbBJbDJ.XYs91.ZKxL74.XzDQlhTi', 'assets/images/people3.png', '2024-11-16 05:47:27'),
-(4, 'noky', 'Noky Alrizqi', '$2y$10$L4Rg9QHB3feegU/DiG8QhuolP6sI2oaZ1IRy6DHuwj9Iq5Yk6jn4y', NULL, '2024-11-16 12:29:10');
+(4, 'noky', 'Noky Alrizqi', '$2y$10$lYxCQHuv8HprSHV.LPACcOcErcaYBC48OGWKC8bEo/kgT6T28nicC', 'assets/images/people3.png', '2024-11-16 12:29:10');
 
 --
 -- Indexes for dumped tables
