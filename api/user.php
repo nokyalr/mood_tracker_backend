@@ -17,20 +17,27 @@ $db = $database->getConnection();
 $request_method = $_SERVER["REQUEST_METHOD"];
 switch ($request_method) {
     case 'POST':
-        if ($_GET['action'] == 'register') {
-            registerUser($db);
-        } elseif ($_GET['action'] == 'login') {
-            loginUser($db);
+        if (isset($_GET['action'])) {
+            if ($_GET['action'] == 'register') {
+                registerUser($db);
+            } elseif ($_GET['action'] == 'login') {
+                loginUser($db);
+            } elseif ($_GET['action'] == 'updateProfile') {
+                updateProfile($db);
+            } elseif ($_GET['action'] == 'updateAvatar') {
+                updateAvatar($db);
+            }
         }
         break;
     case 'GET':
-        if ($_GET['action'] == 'get_user') {
+        if (isset($_GET['action']) && $_GET['action'] == 'get_user') {
             getUser($db);
         }
         break;
     default:
         http_response_code(405);
         echo json_encode(["message" => "Method not allowed"]);
+        break;
 }
 
 function registerUser($db) {
@@ -120,3 +127,53 @@ function getUser($db) {
         echo json_encode(["message" => "User not found"]);
     }
 }
+
+function updateProfile($db) {
+    $data = json_decode(file_get_contents("php://input"), true);
+
+    if (empty($data['user_id']) || empty($data['name']) || empty($data['password'])) {
+        http_response_code(400);
+        echo json_encode(["message" => "All fields are required"]);
+        return;
+    }
+
+    $query = "UPDATE users SET name = :name, password = :password WHERE user_id = :user_id";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(":name", $data['name']);
+    $stmt->bindParam(":password", password_hash($data['password'], PASSWORD_BCRYPT));
+    $stmt->bindParam(":user_id", $data['user_id']);
+
+    if ($stmt->execute()) {
+        http_response_code(200);
+        echo json_encode(["message" => "Profile updated successfully"]);
+    } else {
+        $error = $stmt->errorInfo();
+        http_response_code(400);
+        echo json_encode(["message" => "Error updating profile", "error" => $error]);
+    }
+}
+
+function updateAvatar($db) {
+    $data = json_decode(file_get_contents("php://input"), true);
+
+    if (empty($data['user_id']) || empty($data['profile_picture'])) {
+        http_response_code(400);
+        echo json_encode(["message" => "User ID and Profile Picture are required"]);
+        return;
+    }
+
+    $query = "UPDATE users SET profile_picture = :profile_picture WHERE user_id = :user_id";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(":profile_picture", $data['profile_picture']);
+    $stmt->bindParam(":user_id", $data['user_id']);
+
+    if ($stmt->execute()) {
+        http_response_code(200);
+        echo json_encode(["message" => "Avatar updated successfully"]);
+    } else {
+        $error = $stmt->errorInfo();
+        http_response_code(400);
+        echo json_encode(["message" => "Error updating avatar", "error" => $error]);
+    }
+}
+?>
