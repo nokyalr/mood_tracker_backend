@@ -32,7 +32,9 @@ switch ($request_method) {
     case 'GET':
         if (isset($_GET['action']) && $_GET['action'] == 'get_user') {
             getUser($db);
-        }
+        } elseif ($_GET['action'] == 'get_monthly_mood_summary') {
+        getMonthlyMoodSummary($db);
+    }
         break;
     default:
         http_response_code(405);
@@ -176,4 +178,43 @@ function updateAvatar($db) {
         echo json_encode(["message" => "Error updating avatar", "error" => $error]);
     }
 }
+
+function getMonthlyMoodSummary($db) {
+    if (empty($_GET['user_id']) || empty($_GET['month']) || empty($_GET['year'])) {
+        http_response_code(400);
+        echo json_encode(["message" => "user_id, month, and year are required"]);
+        return;
+    }
+
+    $user_id = $_GET['user_id'];
+    $month = $_GET['month'];
+    $year = $_GET['year'];
+
+    $query = "SELECT 
+                AVG(mood_score) AS average_mood,
+                SUM(CASE WHEN mood_score = 1 THEN 1 ELSE 0 END) AS score_1,
+                SUM(CASE WHEN mood_score = 2 THEN 1 ELSE 0 END) AS score_2,
+                SUM(CASE WHEN mood_score = 3 THEN 1 ELSE 0 END) AS score_3,
+                SUM(CASE WHEN mood_score = 4 THEN 1 ELSE 0 END) AS score_4,
+                SUM(CASE WHEN mood_score = 5 THEN 1 ELSE 0 END) AS score_5
+              FROM posts
+              WHERE user_id = :user_id AND MONTH(post_date) = :month AND YEAR(post_date) = :year";
+
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(":user_id", $user_id);
+    $stmt->bindParam(":month", $month);
+    $stmt->bindParam(":year", $year);
+    $stmt->execute();
+
+    $summary = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($summary) {
+        http_response_code(200);
+        echo json_encode($summary);
+    } else {
+        http_response_code(404);
+        echo json_encode(["message" => "No data found for this month"]);
+    }
+}
+
 ?>
