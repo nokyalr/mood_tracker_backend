@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 17, 2024 at 02:18 AM
+-- Generation Time: Nov 20, 2024 at 07:21 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -45,19 +45,6 @@ CREATE TABLE `activity_suggestions` (
   `mood_category` enum('Depressed','Anxious','Angry','Overwhelmed','Sad','Tired','Frustrated','Disappointed','Okay','Satisfied','Hopeful','Relaxed','Happy','Excited','Proud','Loved','Euphoric','Inspired','Grateful','Accomplished') NOT NULL,
   `suggestion_text` text NOT NULL,
   `link_to_article` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `calendar`
---
-
-CREATE TABLE `calendar` (
-  `calendar_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `mood_date` date NOT NULL,
-  `mood_summary` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -148,12 +135,12 @@ CREATE TABLE `posts` (
 --
 
 INSERT INTO `posts` (`post_id`, `user_id`, `mood_id`, `mood_score`, `post_date`, `content`, `is_posted`, `created_at`, `updated_at`) VALUES
-(1, 1, 13, 4, '2024-11-10', 'Hari ini sangat menyenangkan! Saya berhasil menyelesaikan banyak tugas.', 1, '2024-11-16 05:54:48', '2024-11-16 05:54:48'),
-(2, 2, 3, 2, '2024-11-09', 'Saya merasa kesal karena banyak hal tidak berjalan sesuai rencana.', 1, '2024-11-16 05:54:48', '2024-11-16 05:54:48'),
-(3, 3, 17, 5, '2024-11-08', 'Luar biasa! Saya memenangkan kompetisi yang sangat sulit!', 1, '2024-11-16 05:54:48', '2024-11-16 05:54:48'),
-(4, 1, 9, 3, '2024-11-07', 'Hari yang biasa saja, tidak ada hal spesial.', 1, '2024-11-16 05:54:48', '2024-11-16 05:54:48'),
-(5, 2, 1, 1, '2024-11-06', 'Saya merasa sedih karena kehilangan sesuatu yang berharga.', 1, '2024-11-16 05:54:48', '2024-11-16 10:35:05'),
-(6, 3, 14, 4, '2024-11-05', 'Saya sangat bersemangat tentang proyek baru yang sedang saya kerjakan.', 1, '2024-11-16 05:54:48', '2024-11-16 05:54:48');
+(1, 1, 13, 4, '2024-11-10', 'Today was very enjoyable! I managed to accomplish a lot of tasks.', 1, '2024-11-16 05:54:48', '2024-11-17 02:11:44'),
+(2, 2, 3, 2, '2024-11-09', 'I feel annoyed because many things did not go as planned.', 1, '2024-11-16 05:54:48', '2024-11-17 02:11:44'),
+(3, 3, 17, 5, '2024-11-08', 'Amazing! I won a very challenging competition!', 1, '2024-11-16 05:54:48', '2024-11-17 02:11:44'),
+(4, 1, 9, 3, '2024-11-07', 'An ordinary day, nothing special.', 1, '2024-11-16 05:54:48', '2024-11-17 02:11:44'),
+(5, 2, 1, 1, '2024-11-06', 'I feel sad because I lost something valuable.', 1, '2024-11-16 05:54:48', '2024-11-17 02:11:44'),
+(6, 3, 14, 4, '2024-11-05', 'I am very excited about the new project I am working on.', 1, '2024-11-16 05:54:48', '2024-11-17 02:11:44');
 
 -- --------------------------------------------------------
 
@@ -166,18 +153,6 @@ CREATE TABLE `reports` (
   `user_id` int(11) NOT NULL,
   `report_month` date NOT NULL,
   `report_data` longtext DEFAULT NULL CHECK (json_valid(`report_data`))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `sub_moods`
---
-
-CREATE TABLE `sub_moods` (
-  `sub_mood_id` int(11) NOT NULL,
-  `mood_id` int(11) NOT NULL,
-  `sub_mood_name` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -200,10 +175,10 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `username`, `name`, `password`, `profile_picture`, `created_at`) VALUES
-(1, 'anniey', 'Anniey Flare', '$2y$10$ZDPK7N5ys4brPgK0BG21Du57IMQVzgS4mfJ/A9J21jHfjM.0OYOt2', 'assets/images/people4.png', '2024-11-16 05:47:27'),
+(1, 'anniey', 'Anniey Firefly', '$2y$10$dluz6cwZn40OxqVYbSVNOO1UUFzxhz7fjGApxl84VesPXF5ohSt.q', 'assets/images/people6.png', '2024-11-16 05:47:27'),
 (2, 'stevia_', 'Stevia Wize', '$2y$10$vHfUZRAmUAfAZlwkkxTTduNssOPC9lEOfGl5lwknBD3YCpxvyiG.q', 'assets/images/people5.png', '2024-11-16 05:47:27'),
-(3, 'mar_lize', 'Marlize Abraham', '$2y$10$lgUx74f8R87MEvWTfAsUiuwjdbBJbDJ.XYs91.ZKxL74.XzDQlhTi', 'assets/images/people3.png', '2024-11-16 05:47:27'),
-(4, 'noky', 'Noky Alrizqi', '$2y$10$lYxCQHuv8HprSHV.LPACcOcErcaYBC48OGWKC8bEo/kgT6T28nicC', 'assets/images/people3.png', '2024-11-16 12:29:10');
+(3, 'mar_lize', 'Marlize Abraham', '$2y$10$/w4tjzSCW8F4QuE31e8hHegat6ez5kP453hfmW41bPfui0p.WpKBe', 'assets/images/people2.png', '2024-11-16 05:47:27'),
+(4, 'noky', 'Noky Alrizqi P A', '$2y$10$z5AtjwJTDKxcoysplPnpgOG6ZWfl5NCcF4iz8llm13hB5hXRZCUBO', 'assets/images/people3.png', '2024-11-16 12:29:10');
 
 --
 -- Indexes for dumped tables
@@ -221,13 +196,6 @@ ALTER TABLE `activity_logs`
 --
 ALTER TABLE `activity_suggestions`
   ADD PRIMARY KEY (`suggestion_id`);
-
---
--- Indexes for table `calendar`
---
-ALTER TABLE `calendar`
-  ADD PRIMARY KEY (`calendar_id`),
-  ADD KEY `calendar_fk_user` (`user_id`);
 
 --
 -- Indexes for table `comments`
@@ -266,13 +234,6 @@ ALTER TABLE `reports`
   ADD KEY `reports_fk_user` (`user_id`);
 
 --
--- Indexes for table `sub_moods`
---
-ALTER TABLE `sub_moods`
-  ADD PRIMARY KEY (`sub_mood_id`),
-  ADD KEY `sub_mood_fk_mood` (`mood_id`);
-
---
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -294,12 +255,6 @@ ALTER TABLE `activity_logs`
 --
 ALTER TABLE `activity_suggestions`
   MODIFY `suggestion_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `calendar`
---
-ALTER TABLE `calendar`
-  MODIFY `calendar_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `comments`
@@ -326,12 +281,6 @@ ALTER TABLE `reports`
   MODIFY `report_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `sub_moods`
---
-ALTER TABLE `sub_moods`
-  MODIFY `sub_mood_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
@@ -346,12 +295,6 @@ ALTER TABLE `users`
 --
 ALTER TABLE `activity_logs`
   ADD CONSTRAINT `activity_logs_fk_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
-
---
--- Constraints for table `calendar`
---
-ALTER TABLE `calendar`
-  ADD CONSTRAINT `calendar_fk_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `comments`
@@ -379,12 +322,6 @@ ALTER TABLE `posts`
 --
 ALTER TABLE `reports`
   ADD CONSTRAINT `reports_fk_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
-
---
--- Constraints for table `sub_moods`
---
-ALTER TABLE `sub_moods`
-  ADD CONSTRAINT `sub_mood_fk_mood` FOREIGN KEY (`mood_id`) REFERENCES `moods` (`mood_id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
