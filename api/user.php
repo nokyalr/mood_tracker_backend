@@ -132,16 +132,31 @@ function getUser($db) {
 function updateProfile($db) {
     $data = json_decode(file_get_contents("php://input"), true);
 
-    if (empty($data['user_id']) || empty($data['name']) || empty($data['password'])) {
+    if (empty($data['user_id']) || empty($data['name']) || empty($data['old_password']) || empty($data['new_password'])) {
         http_response_code(400);
         echo json_encode(["message" => "All fields are required"]);
         return;
     }
 
+    // Validasi Old Password
+    $query = "SELECT password FROM users WHERE user_id = :user_id";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(":user_id", $data['user_id']);
+    $stmt->execute();
+
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$user || !password_verify((string)$data['old_password'], $user['password'])) {
+        http_response_code(400);
+        echo json_encode(["message" => "Old password is incorrect"]);
+        return;
+    }
+
+    // Update Profile
     $query = "UPDATE users SET name = :name, password = :password WHERE user_id = :user_id";
     $stmt = $db->prepare($query);
     $stmt->bindParam(":name", $data['name']);
-    $stmt->bindParam(":password", password_hash($data['password'], PASSWORD_BCRYPT));
+    $stmt->bindParam(":password", password_hash($data['new_password'], PASSWORD_BCRYPT));
     $stmt->bindParam(":user_id", $data['user_id']);
 
     if ($stmt->execute()) {
@@ -149,10 +164,11 @@ function updateProfile($db) {
         echo json_encode(["message" => "Profile updated successfully"]);
     } else {
         $error = $stmt->errorInfo();
-        http_response_code(400);
+        http_response_code(401);
         echo json_encode(["message" => "Error updating profile", "error" => $error]);
     }
 }
+
 
 function updateAvatar($db) {
     $data = json_decode(file_get_contents("php://input"), true);
