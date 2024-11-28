@@ -35,6 +35,8 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") {
 } elseif ($_SERVER["REQUEST_METHOD"] === "POST") {
     if (isset($_GET['action']) && $_GET['action'] === 'add_friend') {
         addFriend($db);
+    } elseif (isset($_GET['action']) && $_GET['action'] === 'remove_friend') {
+        removeFriend($db);
     } elseif (isset($_GET['action']) && $_GET['action'] === 'accept_friend_request') {
         acceptFriendRequest($db);
     } elseif (isset($_GET['action']) && $_GET['action'] === 'reject_friend_request') {
@@ -148,7 +150,6 @@ function getFriendIds($db) {
 }
 
 function addFriend($db) {
-    // Pastikan data datang dari body dengan metode POST
     $data = json_decode(file_get_contents("php://input"), true);
 
     if (isset($data['user_id']) && isset($data['friend_id'])) {
@@ -180,6 +181,28 @@ function addFriend($db) {
             } else {
                 echo json_encode(['status' => 'error', 'message' => 'Failed to send friend request']);
             }
+        }
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Invalid parameters']);
+    }
+}
+
+function removeFriend($db) {
+    $data = json_decode(file_get_contents("php://input"), true);
+
+    if (isset($data['user_id']) && isset($data['friend_id'])) {
+        $userId = $data['user_id'];
+        $friendId = $data['friend_id'];
+
+        $query = "DELETE FROM friends WHERE (user_id = :user_id AND friend_id = :friend_id) OR (user_id = :friend_id AND friend_id = :user_id)";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':user_id', $userId);
+        $stmt->bindParam(':friend_id', $friendId);
+
+        if ($stmt->execute()) {
+            echo json_encode(['status' => 'success', 'message' => 'Friend removed successfully']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Failed to remove friend']);
         }
     } else {
         echo json_encode(['status' => 'error', 'message' => 'Invalid parameters']);
