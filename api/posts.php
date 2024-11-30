@@ -35,6 +35,13 @@ switch ($request_method) {
 
 function createPost($db) {
     $data = json_decode(file_get_contents("php://input"), true);
+
+    if (empty($data['user_id']) || empty($data['mood_id']) || empty($data['mood_score']) || empty($data['content']) || empty($data['post_date'])) {
+        http_response_code(400);
+        echo json_encode(["message" => "All fields are required"]);
+        return;
+    }
+
     $query = "INSERT INTO posts (user_id, mood_id, mood_score, content, is_posted, post_date) 
               VALUES (:user_id, :mood_id, :mood_score, :content, :is_posted, :post_date)";
     $stmt = $db->prepare($query);
@@ -55,21 +62,37 @@ function createPost($db) {
 }
 
 function getPosts($db) {
-    $query = "SELECT 
-        posts.post_id, 
-        users.name, 
-        users.profile_picture, 
-        moods.mood_category, 
-        posts.content AS description, 
-        posts.post_date AS date, 
-        posts.mood_score, 
-        posts.created_at AS time 
-    FROM 
-        posts
-    INNER JOIN users ON posts.user_id = users.user_id
-    INNER JOIN moods ON posts.mood_id = moods.mood_id
-    ORDER BY posts.updated_at DESC";
+    if (empty($_GET['user_id'])) {
+        http_response_code(400);
+        echo json_encode(["message" => "user_id is required"]);
+        return;
+    }
+
+    $user_id = $_GET['user_id'];
+
+    $query = "
+        SELECT 
+            posts.post_id, 
+            users.name, 
+            users.profile_picture, 
+            moods.mood_category, 
+            posts.content AS description, 
+            posts.post_date AS date, 
+            posts.mood_score, 
+            posts.created_at AS time 
+        FROM 
+            posts
+        INNER JOIN users ON posts.user_id = users.user_id
+        INNER JOIN moods ON posts.mood_id = moods.mood_id
+        LEFT JOIN friends ON (friends.user_id = :user_id AND friends.friend_id = posts.user_id AND friends.status = 'accepted')
+        WHERE 
+            posts.is_posted = 1 AND (posts.user_id = :user_id OR friends.friend_id IS NOT NULL)
+        ORDER BY 
+            posts.updated_at DESC
+    ";
+
     $stmt = $db->prepare($query);
+    $stmt->bindParam(":user_id", $user_id);
     $stmt->execute();
 
     $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
