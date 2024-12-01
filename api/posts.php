@@ -30,6 +30,8 @@ switch ($request_method) {
             getCommentCount($db);
         } else if ($_SERVER["REQUEST_METHOD"] === "GET" && isset($_GET['action']) && $_GET['action'] == 'get_first_comment') {
             getFirstComment($db);
+        } else if ($_SERVER["REQUEST_METHOD"] === "GET" && isset($_GET['action']) && $_GET['action'] == 'get_last_sub_mood') {
+            getLastSubMood($db);
         } else {
             getPosts($db);
         }
@@ -274,6 +276,35 @@ function addComment($db) {
     } else {
         http_response_code(400);
         echo json_encode(["message" => "Error adding comment"]);
+    }
+}
+
+function getLastSubMood($db) {
+    $userId = $_GET['user_id'];
+
+    $query = "
+        SELECT 
+            moods.mood_category AS sub_mood
+        FROM 
+            posts
+        INNER JOIN 
+            moods ON posts.mood_id = moods.mood_id
+        WHERE 
+            posts.user_id = :user_id
+        ORDER BY 
+            posts.created_at DESC
+        LIMIT 1
+    ";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':user_id', $userId);
+    $stmt->execute();
+
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($result) {
+        echo json_encode($result);
+    } else {
+        http_response_code(404);
+        echo json_encode(['message' => 'No sub mood found']);
     }
 }
 

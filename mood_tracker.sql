@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 01, 2024 at 05:43 AM
+-- Generation Time: Dec 01, 2024 at 09:43 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -31,8 +31,20 @@ CREATE TABLE `activity_suggestions` (
   `suggestion_id` int(11) NOT NULL,
   `mood_category` enum('Depressed','Anxious','Angry','Overwhelmed','Sad','Tired','Frustrated','Disappointed','Okay','Satisfied','Hopeful','Relaxed','Happy','Excited','Proud','Loved','Euphoric','Inspired','Grateful','Accomplished') NOT NULL,
   `suggestion_text` text NOT NULL,
+  `description` text DEFAULT NULL,
   `link_to_article` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `activity_suggestions`
+--
+
+INSERT INTO `activity_suggestions` (`suggestion_id`, `mood_category`, `suggestion_text`, `description`, `link_to_article`) VALUES
+(1, 'Tired', 'Self-help tips to fight tiredness', 'Many cases of tiredness are due to stress, not enough sleep, poor diet and other lifestyle factors. Try these self-help tips to restore your energy levels.', 'https://www.nhs.uk/live-well/sleep-and-tiredness/self-help-tips-to-fight-fatigue/'),
+(2, 'Tired', '5 Easy Ways to Overcome Endless Tiredness', 'Changes do happen often, whether it’s in daily activities or never-ending pandemic situations. This makes us feel so tired that it can make our body lack energy, both physically and emotionally. ', 'https://www.bp.com/en_id/indonesia/home/products-and-services/fuels-retail/news-article/5-easy-ways-to-overcome-endless-tiredness.html'),
+(3, 'Tired', 'Fatigue fighting tips', 'Fatigue is a feeling of weariness, tiredness, or lack of energy that does not go away when you rest. People may feel fatigued in body or mind (physical or psychological fatigue).', 'https://www.betterhealth.vic.gov.au/health/conditionsandtreatments/fatigue-fighting-tips'),
+(4, 'Frustrated', '18 Ways to Cope with Frustration', 'Frustration can be hard to put into words – it’s a complicated mix of anger, disappointment, and annoyance. For most health care workers, frustration levels are particularly high right now as many face PPE shortages, minimal workplace support, and a seemingly careless general public.', 'https://mhanational.org/18-ways-cope-frustration'),
+(5, 'Frustrated', 'How to Deal With Frustration', 'Frustration is a type of emotional reaction to stress. It\'s common to have this feeling when you encounter daily stressors at home, at school, at work, and in relationships. ', 'https://www.verywellmind.com/feel-less-frustrated-when-stressed-3145200');
 
 -- --------------------------------------------------------
 
@@ -262,7 +274,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `activity_suggestions`
 --
 ALTER TABLE `activity_suggestions`
-  MODIFY `suggestion_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `suggestion_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `comments`
