@@ -17,16 +17,42 @@ $db = $database->getConnection();
 $request_method = $_SERVER["REQUEST_METHOD"];
 switch ($request_method) {
     case 'POST':
-        createPost($db);
+        if (isset($_GET['action']) && $_GET['action'] == 'add_comment') {
+            addComment($db);
+        } else {
+            createPost($db);
+        }
         break;
     case 'GET':
-        getPosts($db);
+        if (isset($_GET['action']) && $_GET['action'] == 'get_comments') {
+            getComments($db);
+        } else if ($_SERVER["REQUEST_METHOD"] === "GET" && isset($_GET['action']) && $_GET['action'] == 'get_comment_count') {
+            getCommentCount($db);
+        } else if ($_SERVER["REQUEST_METHOD"] === "GET" && isset($_GET['action']) && $_GET['action'] == 'get_first_comment') {
+            getFirstComment($db);
+        } else {
+            getPosts($db);
+        }
         break;
     case 'PUT':
         updatePost($db);
         break;
     case 'DELETE':
         deletePost($db);
+        break;
+        case 'POST':
+        if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_GET['action']) && $_GET['action'] == 'add_comment') {
+            addComment($db);
+        } else {
+            createPost($db);
+        }
+        break;
+    case 'GET':
+        if (isset($_GET['action']) && $_GET['action'] == 'get_comments') {
+            getComments($db);
+        } else {
+            getPosts($db);
+        }
         break;
     default:
         http_response_code(405);
@@ -131,4 +157,124 @@ function deletePost($db) {
         echo json_encode(["message" => "Error deleting post"]);
     }
 }
+
+function getComments($db) {
+    if (empty($_GET['post_id'])) {
+        http_response_code(400);
+        echo json_encode(["message" => "post_id is required"]);
+        return;
+    }
+
+    $post_id = $_GET['post_id'];
+
+    $query = "
+        SELECT 
+            comments.comment_id, 
+            comments.comment, 
+            comments.created_at, 
+            users.name, 
+            users.profile_picture 
+        FROM 
+            comments
+        INNER JOIN users ON comments.user_id = users.user_id
+        WHERE 
+            comments.post_id = :post_id
+        ORDER BY 
+            comments.created_at ASC
+    ";
+
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(":post_id", $post_id);
+    $stmt->execute();
+
+    $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    http_response_code(200);
+    echo json_encode($comments);
+}
+
+function getFirstComment($db) {
+    if (empty($_GET['post_id'])) {
+        http_response_code(400);
+        echo json_encode(["message" => "post_id is required"]);
+        return;
+    }
+
+    $post_id = $_GET['post_id'];
+
+    $query = "
+        SELECT 
+            comments.comment, 
+            users.name 
+        FROM 
+            comments
+        INNER JOIN users ON comments.user_id = users.user_id
+        WHERE 
+            comments.post_id = :post_id
+        ORDER BY 
+            comments.created_at ASC
+        LIMIT 1
+    ";
+
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(":post_id", $post_id);
+    $stmt->execute();
+
+    $comment = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($comment) {
+        http_response_code(200);
+        echo json_encode($comment);
+    } else {
+        http_response_code(404);
+        echo json_encode(["message" => "No comments found"]);
+    }
+}
+
+function getCommentCount($db) {
+    if (empty($_GET['post_id'])) {
+        http_response_code(400);
+        echo json_encode(["message" => "post_id is required"]);
+        return;
+    }
+
+    $post_id = $_GET['post_id'];
+
+    $query = "
+        SELECT COUNT(*) as comment_count
+        FROM comments
+        WHERE post_id = :post_id
+    ";
+
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(":post_id", $post_id);
+    $stmt->execute();
+
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    http_response_code(200);
+    echo json_encode($result);
+}
+
+function addComment($db) {
+    $data = json_decode(file_get_contents("php://input"), true);
+
+    if (empty($data['post_id']) || empty($data['user_id']) || empty($data['comment'])) {
+        http_response_code(400);
+        echo json_encode(["message" => "All fields are required"]);
+        return;
+    }
+
+    $query = "INSERT INTO comments (post_id, user_id, comment) VALUES (:post_id, :user_id, :comment)";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(":post_id", $data['post_id']);
+    $stmt->bindParam(":user_id", $data['user_id']);
+    $stmt->bindParam(":comment", $data['comment']);
+
+    if ($stmt->execute()) {
+        http_response_code(201);
+        echo json_encode(["message" => "Comment added successfully"]);
+    } else {
+        http_response_code(400);
+        echo json_encode(["message" => "Error adding comment"]);
+    }
+}
+
 ?>

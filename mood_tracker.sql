@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 20, 2024 at 07:21 AM
+-- Generation Time: Dec 01, 2024 at 05:43 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,19 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `mood_tracker`
 --
-
--- --------------------------------------------------------
-
---
--- Table structure for table `activity_logs`
---
-
-CREATE TABLE `activity_logs` (
-  `log_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `activity_date` date NOT NULL,
-  `activity_text` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -62,6 +49,20 @@ CREATE TABLE `comments` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `comments`
+--
+
+INSERT INTO `comments` (`comment_id`, `post_id`, `user_id`, `comment`, `created_at`, `updated_at`) VALUES
+(1, 1, 2, 'Great to hear about your day!', '2024-12-01 02:24:08', '2024-12-01 02:24:08'),
+(2, 1, 3, 'Sounds productive, well done!', '2024-12-01 02:24:08', '2024-12-01 02:24:08'),
+(3, 1, 4, 'What tasks did you complete?', '2024-12-01 02:24:08', '2024-12-01 02:24:08'),
+(4, 7, 2, 'wow what is that :D', '2024-12-01 04:33:57', '2024-12-01 04:33:57'),
+(5, 1, 1, 'ty', '2024-12-01 04:34:29', '2024-12-01 04:34:29'),
+(6, 1, 1, 'lol', '2024-12-01 04:34:36', '2024-12-01 04:34:36'),
+(7, 1, 1, 'lmao', '2024-12-01 04:35:27', '2024-12-01 04:35:27'),
+(8, 1, 4, 'well done', '2024-12-01 04:39:14', '2024-12-01 04:39:14');
+
 -- --------------------------------------------------------
 
 --
@@ -73,6 +74,24 @@ CREATE TABLE `friends` (
   `friend_id` int(11) NOT NULL,
   `status` enum('pending','accepted','blocked') DEFAULT 'pending'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `friends`
+--
+
+INSERT INTO `friends` (`user_id`, `friend_id`, `status`) VALUES
+(1, 2, 'accepted'),
+(1, 3, 'accepted'),
+(1, 4, 'accepted'),
+(2, 1, 'accepted'),
+(2, 3, 'accepted'),
+(3, 1, 'accepted'),
+(3, 2, 'accepted'),
+(4, 1, 'accepted'),
+(4, 5, 'accepted'),
+(4, 9, 'accepted'),
+(5, 4, 'accepted'),
+(9, 4, 'accepted');
 
 -- --------------------------------------------------------
 
@@ -140,20 +159,24 @@ INSERT INTO `posts` (`post_id`, `user_id`, `mood_id`, `mood_score`, `post_date`,
 (3, 3, 17, 5, '2024-11-08', 'Amazing! I won a very challenging competition!', 1, '2024-11-16 05:54:48', '2024-11-17 02:11:44'),
 (4, 1, 9, 3, '2024-11-07', 'An ordinary day, nothing special.', 1, '2024-11-16 05:54:48', '2024-11-17 02:11:44'),
 (5, 2, 1, 1, '2024-11-06', 'I feel sad because I lost something valuable.', 1, '2024-11-16 05:54:48', '2024-11-17 02:11:44'),
-(6, 3, 14, 4, '2024-11-05', 'I am very excited about the new project I am working on.', 1, '2024-11-16 05:54:48', '2024-11-17 02:11:44');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `reports`
---
-
-CREATE TABLE `reports` (
-  `report_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `report_month` date NOT NULL,
-  `report_data` longtext DEFAULT NULL CHECK (json_valid(`report_data`))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+(6, 3, 14, 4, '2024-11-05', 'I am very excited about the new project I am working on.', 1, '2024-11-16 05:54:48', '2024-11-17 02:11:44'),
+(7, 1, 17, 5, '2024-11-27', 'This is the best day of my life! I got a big suprize from my friends', 1, '2024-11-28 04:53:00', '2024-11-28 04:53:00'),
+(8, 9, 15, 4, '0000-00-00', 'Hello worlds', 1, '2024-11-29 03:23:08', '2024-11-29 03:23:08'),
+(9, 9, 19, 5, '2024-11-26', 'hari ini sangat cerah', 1, '2024-11-29 03:25:03', '2024-11-29 03:25:51'),
+(10, 9, 4, 1, '2024-11-28', 'terjadi kecelekaaan', 1, '2024-11-29 03:26:54', '2024-11-29 03:26:54'),
+(11, 9, 11, 3, '2024-11-29', 'hari ini normal', 1, '2024-11-29 03:27:31', '2024-11-29 03:27:31'),
+(12, 9, 19, 5, '2024-11-01', 'saya ulang tahun', 1, '2024-11-29 03:29:22', '2024-11-29 03:29:22'),
+(13, 4, 2, 2, '2024-11-29', 'Your post content here', 1, '2024-11-29 14:30:09', '2024-11-29 14:30:09'),
+(14, 4, 5, 5, '2024-11-30', 'wow', 1, '2024-11-30 05:46:06', '2024-11-30 05:46:06'),
+(15, 1, 1, 1, '2024-11-30', 'i got fight with my lil sister', 0, '2024-11-30 06:25:12', '2024-11-30 06:25:12'),
+(16, 1, 1, 1, '2024-11-30', 'd', 0, '2024-11-30 06:28:42', '2024-11-30 06:28:42'),
+(17, 4, 20, 5, '2024-11-30', 'sup', 1, '2024-11-30 06:47:50', '2024-11-30 06:47:50'),
+(18, 4, 19, 5, '2024-11-30', 'w', 0, '2024-11-30 06:49:05', '2024-11-30 06:49:05'),
+(19, 4, 17, 5, '2024-11-30', 'feeling good', 1, '2024-11-30 06:50:23', '2024-11-30 06:50:23'),
+(20, 4, 14, 4, '2024-11-30', 'nc', 1, '2024-11-30 06:51:03', '2024-11-30 06:51:03'),
+(21, 4, 5, 2, '2024-11-30', 'nothing special', 1, '2024-11-30 07:03:44', '2024-11-30 07:03:44'),
+(22, 4, 6, 2, '2024-11-20', 'back to back', 1, '2024-11-30 07:31:02', '2024-11-30 07:31:02'),
+(23, 3, 9, 3, '2024-12-01', 'need more time to finish my assigment..', 1, '2024-12-01 04:41:17', '2024-12-01 04:41:17');
 
 -- --------------------------------------------------------
 
@@ -175,21 +198,19 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `username`, `name`, `password`, `profile_picture`, `created_at`) VALUES
-(1, 'anniey', 'Anniey Firefly', '$2y$10$dluz6cwZn40OxqVYbSVNOO1UUFzxhz7fjGApxl84VesPXF5ohSt.q', 'assets/images/people6.png', '2024-11-16 05:47:27'),
+(1, 'anniey', 'Annieyy', '$2y$10$rWJ9tBBcP9br.6kwS4.8S.9vvnta7b.WmI9t6r6dMPsSJanNRMQc.', 'assets/images/people1.png', '2024-11-16 05:47:27'),
 (2, 'stevia_', 'Stevia Wize', '$2y$10$vHfUZRAmUAfAZlwkkxTTduNssOPC9lEOfGl5lwknBD3YCpxvyiG.q', 'assets/images/people5.png', '2024-11-16 05:47:27'),
 (3, 'mar_lize', 'Marlize Abraham', '$2y$10$/w4tjzSCW8F4QuE31e8hHegat6ez5kP453hfmW41bPfui0p.WpKBe', 'assets/images/people2.png', '2024-11-16 05:47:27'),
-(4, 'noky', 'Noky Alrizqi P A', '$2y$10$z5AtjwJTDKxcoysplPnpgOG6ZWfl5NCcF4iz8llm13hB5hXRZCUBO', 'assets/images/people3.png', '2024-11-16 12:29:10');
+(4, 'noky', 'Noky Alrizqi P A', '$2y$10$OHlji36PRo5HewdbB.MNY.g.jKFlhuVbFNLfXcDjyyTYsB/ah9ezK', 'assets/images/people7.png', '2024-11-16 12:29:10'),
+(5, 'dailysam', 'sam', '$2y$10$bFsv3nbLm8wl3V1dQdE38.QiNCasRD29x55ruGqVhV8mYry7ZHDny', 'assets/images/people2.png', '2024-11-25 22:12:53'),
+(6, 'funnyacell', 'ashila', '$2y$10$TiNs8jbItsO/y5vl2I8L5.VIVLZSAq/VS7aOPGXsa0K5HCInIrPOW', NULL, '2024-11-25 22:13:14'),
+(7, 'johnside', 'john', '$2y$10$09r8yQUpUoRp7qjnc.FoFOpfxCGmCu01Shykdnawp46TYpL5fM5ku', NULL, '2024-11-25 22:13:30'),
+(8, 'chopi', 'thariq', '$2y$10$obWQR8.PcjjPMSP1MRbWXu2Tepx3DJ7AF/sYLNovUIbdzcwbBWbF6', 'assets/images/people5.png', '2024-11-29 02:52:08'),
+(9, 'user1', 'user', '$2y$10$X3aHD6JQ4q3duvDxkK.Uh.sk0E9nYv1SqNvoQjLA6n6rL8tu2htJ2', 'assets/images/people6.png', '2024-11-29 03:18:04');
 
 --
 -- Indexes for dumped tables
 --
-
---
--- Indexes for table `activity_logs`
---
-ALTER TABLE `activity_logs`
-  ADD PRIMARY KEY (`log_id`),
-  ADD KEY `activity_logs_fk_user` (`user_id`);
 
 --
 -- Indexes for table `activity_suggestions`
@@ -227,13 +248,6 @@ ALTER TABLE `posts`
   ADD KEY `posts_fk_mood` (`mood_id`);
 
 --
--- Indexes for table `reports`
---
-ALTER TABLE `reports`
-  ADD PRIMARY KEY (`report_id`),
-  ADD KEY `reports_fk_user` (`user_id`);
-
---
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -245,12 +259,6 @@ ALTER TABLE `users`
 --
 
 --
--- AUTO_INCREMENT for table `activity_logs`
---
-ALTER TABLE `activity_logs`
-  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `activity_suggestions`
 --
 ALTER TABLE `activity_suggestions`
@@ -260,7 +268,7 @@ ALTER TABLE `activity_suggestions`
 -- AUTO_INCREMENT for table `comments`
 --
 ALTER TABLE `comments`
-  MODIFY `comment_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `comment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `moods`
@@ -272,29 +280,17 @@ ALTER TABLE `moods`
 -- AUTO_INCREMENT for table `posts`
 --
 ALTER TABLE `posts`
-  MODIFY `post_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
-
---
--- AUTO_INCREMENT for table `reports`
---
-ALTER TABLE `reports`
-  MODIFY `report_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `post_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- Constraints for dumped tables
 --
-
---
--- Constraints for table `activity_logs`
---
-ALTER TABLE `activity_logs`
-  ADD CONSTRAINT `activity_logs_fk_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `comments`
@@ -316,12 +312,6 @@ ALTER TABLE `friends`
 ALTER TABLE `posts`
   ADD CONSTRAINT `posts_fk_mood` FOREIGN KEY (`mood_id`) REFERENCES `moods` (`mood_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `posts_fk_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
-
---
--- Constraints for table `reports`
---
-ALTER TABLE `reports`
-  ADD CONSTRAINT `reports_fk_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
