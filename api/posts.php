@@ -34,6 +34,12 @@ switch ($request_method) {
             getFirstComment($db);
         } else if (isset($_GET['action']) && $_GET['action'] == 'get_last_sub_mood') {
             getLastSubMood($db);
+        } elseif (isset($_GET['action']) && $_GET['action'] == 'search_posts') {
+            searchPosts($db);
+        } elseif (isset($_GET['action']) && $_GET['action'] == 'get_posts_by_status') {
+            $user_id = $_GET['user_id'];
+            $is_posted = $_GET['is_posted'];
+            getPostsByStatus($db, $user_id, $is_posted);
         } else {
             getPosts($db);
         }
@@ -118,7 +124,7 @@ function getPosts($db) {
     echo json_encode($posts);
 }
 
-    function updatePost($db) {
+function updatePost($db) {
     $data = json_decode(file_get_contents("php://input"), true);
   
     if (empty($data['post_id']) || empty($data['content']) || empty($data['mood_score'])) {
@@ -162,6 +168,104 @@ function deletePost($db) {
         http_response_code(400);
         echo json_encode(["message" => "Error deleting post"]);
     }
+}
+
+function searchPosts($db) {
+    $query = $_GET['query'] ?? '';
+    $user_id = $_GET['user_id'] ?? '';
+
+    $searchQuery = "
+        SELECT 
+            posts.post_id, 
+            posts.user_id,
+            users.name, 
+            users.profile_picture, 
+            moods.mood_category, 
+            posts.content AS description, 
+            posts.post_date AS date, 
+            posts.mood_score, 
+            posts.created_at AS time 
+        FROM 
+            posts
+        INNER JOIN users ON posts.user_id = users.user_id
+        INNER JOIN moods ON posts.mood_id = moods.mood_id
+        LEFT JOIN friends ON (friends.user_id = :user_id AND friends.friend_id = posts.user_id AND friends.status = 'accepted')
+        WHERE 
+            posts.is_posted = 1 AND (posts.user_id = :user_id OR friends.friend_id IS NOT NULL) AND (
+                moods.mood_level LIKE :query OR 
+                moods.mood_category LIKE :query OR 
+                posts.content LIKE :query
+            )
+        ORDER BY 
+            posts.updated_at DESC
+    ";
+
+    $stmt = $db->prepare($searchQuery);
+    $searchTerm = '%' . $query . '%';
+    $stmt->bindParam(':query', $searchTerm);
+    $stmt->bindParam(':user_id', $user_id);
+    $stmt->execute();
+
+    $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    http_response_code(200);
+    echo json_encode($posts);
+}
+
+function getPostsByStatus($db, $user_id, $is_posted) {
+    if ($is_posted == 0) {
+        // Fetch saved posts (is_posted = 0) only for the logged-in user
+        $query = "
+            SELECT 
+                posts.post_id, 
+                posts.user_id,
+                users.name, 
+                users.profile_picture, 
+                moods.mood_category, 
+                posts.content AS description, 
+                posts.post_date AS date, 
+                posts.mood_score, 
+                posts.created_at AS time 
+            FROM 
+                posts
+            INNER JOIN users ON posts.user_id = users.user_id
+            INNER JOIN moods ON posts.mood_id = moods.mood_id
+            WHERE 
+                posts.is_posted = 0 AND posts.user_id = :user_id
+            ORDER BY 
+                posts.updated_at DESC
+        ";
+    } else {
+        // Fetch shared posts (is_posted = 1) for the logged-in user and friends
+        $query = "
+            SELECT 
+                posts.post_id, 
+                posts.user_id,
+                users.name, 
+                users.profile_picture, 
+                moods.mood_category, 
+                posts.content AS description, 
+                posts.post_date AS date, 
+                posts.mood_score, 
+                posts.created_at AS time 
+            FROM 
+                posts
+            INNER JOIN users ON posts.user_id = users.user_id
+            INNER JOIN moods ON posts.mood_id = moods.mood_id
+            LEFT JOIN friends ON (friends.user_id = :user_id AND friends.friend_id = posts.user_id AND friends.status = 'accepted')
+            WHERE 
+                posts.is_posted = 1 AND (posts.user_id = :user_id OR friends.friend_id IS NOT NULL)
+            ORDER BY 
+                posts.updated_at DESC
+        ";
+    }
+
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':user_id', $user_id);
+    $stmt->execute();
+
+    $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    http_response_code(200);
+    echo json_encode($posts);
 }
 
 function getComments($db) {
