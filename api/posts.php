@@ -19,6 +19,8 @@ switch ($request_method) {
     case 'POST':
         if (isset($_GET['action']) && $_GET['action'] == 'add_comment') {
             addComment($db);
+        } else if (isset($_GET['action']) && $_GET['action'] == 'delete_post') {
+            deletePost($db);
         } else {
             createPost($db);
         }
@@ -26,11 +28,11 @@ switch ($request_method) {
     case 'GET':
         if (isset($_GET['action']) && $_GET['action'] == 'get_comments') {
             getComments($db);
-        } else if ($_SERVER["REQUEST_METHOD"] === "GET" && isset($_GET['action']) && $_GET['action'] == 'get_comment_count') {
+        } else if (isset($_GET['action']) && $_GET['action'] == 'get_comment_count') {
             getCommentCount($db);
-        } else if ($_SERVER["REQUEST_METHOD"] === "GET" && isset($_GET['action']) && $_GET['action'] == 'get_first_comment') {
+        } else if (isset($_GET['action']) && $_GET['action'] == 'get_first_comment') {
             getFirstComment($db);
-        } else if ($_SERVER["REQUEST_METHOD"] === "GET" && isset($_GET['action']) && $_GET['action'] == 'get_last_sub_mood') {
+        } else if (isset($_GET['action']) && $_GET['action'] == 'get_last_sub_mood') {
             getLastSubMood($db);
         } else {
             getPosts($db);
@@ -42,23 +44,10 @@ switch ($request_method) {
     case 'DELETE':
         deletePost($db);
         break;
-        case 'POST':
-        if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_GET['action']) && $_GET['action'] == 'add_comment') {
-            addComment($db);
-        } else {
-            createPost($db);
-        }
-        break;
-    case 'GET':
-        if (isset($_GET['action']) && $_GET['action'] == 'get_comments') {
-            getComments($db);
-        } else {
-            getPosts($db);
-        }
-        break;
     default:
         http_response_code(405);
         echo json_encode(["message" => "Method not allowed"]);
+        break;
 }
 
 function createPost($db) {
@@ -101,6 +90,7 @@ function getPosts($db) {
     $query = "
         SELECT 
             posts.post_id, 
+            posts.user_id,
             users.name, 
             users.profile_picture, 
             moods.mood_category, 
@@ -128,14 +118,21 @@ function getPosts($db) {
     echo json_encode($posts);
 }
 
-function updatePost($db) {
+    function updatePost($db) {
     $data = json_decode(file_get_contents("php://input"), true);
+  
+    if (empty($data['post_id']) || empty($data['content']) || empty($data['mood_score'])) {
+        http_response_code(400);
+        echo json_encode(["message" => "All fields are required"]);
+        return;
+    }
+  
     $query = "UPDATE posts SET content = :content, mood_score = :mood_score WHERE post_id = :post_id";
     $stmt = $db->prepare($query);
     $stmt->bindParam(":content", $data['content']);
     $stmt->bindParam(":mood_score", $data['mood_score']);
     $stmt->bindParam(":post_id", $data['post_id']);
-
+  
     if ($stmt->execute()) {
         http_response_code(200);
         echo json_encode(["message" => "Post updated successfully"]);
@@ -147,6 +144,13 @@ function updatePost($db) {
 
 function deletePost($db) {
     $data = json_decode(file_get_contents("php://input"), true);
+
+    if (empty($data['post_id'])) {
+        http_response_code(400);
+        echo json_encode(["message" => "post_id is required"]);
+        return;
+    }
+
     $query = "DELETE FROM posts WHERE post_id = :post_id";
     $stmt = $db->prepare($query);
     $stmt->bindParam(":post_id", $data['post_id']);
@@ -194,6 +198,30 @@ function getComments($db) {
     echo json_encode($comments);
 }
 
+function getCommentCount($db) {
+    if (empty($_GET['post_id'])) {
+        http_response_code(400);
+        echo json_encode(["message" => "post_id is required"]);
+        return;
+    }
+
+    $post_id = $_GET['post_id'];
+
+    $query = "
+        SELECT COUNT(*) as comment_count
+        FROM comments
+        WHERE post_id = :post_id
+    ";
+
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(":post_id", $post_id);
+    $stmt->execute();
+
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    http_response_code(200);
+    echo json_encode($result);
+}
+
 function getFirstComment($db) {
     if (empty($_GET['post_id'])) {
         http_response_code(400);
@@ -229,30 +257,6 @@ function getFirstComment($db) {
         http_response_code(404);
         echo json_encode(["message" => "No comments found"]);
     }
-}
-
-function getCommentCount($db) {
-    if (empty($_GET['post_id'])) {
-        http_response_code(400);
-        echo json_encode(["message" => "post_id is required"]);
-        return;
-    }
-
-    $post_id = $_GET['post_id'];
-
-    $query = "
-        SELECT COUNT(*) as comment_count
-        FROM comments
-        WHERE post_id = :post_id
-    ";
-
-    $stmt = $db->prepare($query);
-    $stmt->bindParam(":post_id", $post_id);
-    $stmt->execute();
-
-    $result = $stmt->fetch(PDO::FETCH_ASSOC);
-    http_response_code(200);
-    echo json_encode($result);
 }
 
 function addComment($db) {
@@ -301,11 +305,11 @@ function getLastSubMood($db) {
 
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
     if ($result) {
+        http_response_code(200);
         echo json_encode($result);
     } else {
         http_response_code(404);
         echo json_encode(['message' => 'No sub mood found']);
     }
 }
-
 ?>

@@ -79,14 +79,15 @@ function getSuggestionsBySubMood($db, $user_id) {
 function searchSuggestions($db, $query) {
     $searchQuery = "
         SELECT 
-            suggestion_id, 
+            suggestion_id,
+            mood_category, 
             suggestion_text, 
             description, 
             link_to_article 
         FROM 
             activity_suggestions
         WHERE 
-            suggestion_text LIKE :query OR description LIKE :query
+            suggestion_text LIKE :query OR description LIKE :query OR mood_category LIKE :query
     ";
     $stmt = $db->prepare($searchQuery);
     $searchTerm = '%' . $query . '%';
