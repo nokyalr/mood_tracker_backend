@@ -21,6 +21,8 @@ switch ($request_method) {
             addComment($db);
         } else if (isset($_GET['action']) && $_GET['action'] == 'delete_post') {
             deletePost($db);
+        } else if (isset($_GET['action']) && $_GET['action'] == 'update_post') {
+            updatePost($db);
         } else {
             createPost($db);
         }
@@ -84,6 +86,48 @@ function createPost($db) {
     }
 }
 
+function updatePost($db) {
+    $data = json_decode(file_get_contents("php://input"), true);
+
+    if (empty($data['post_id']) || empty($data['user_id']) || empty($data['content']) || empty($data['mood_score']) || empty($data['mood_id']) || !isset($data['is_posted']) || empty($data['post_date']) || empty($data['updated_at'])) {
+        http_response_code(400);
+        echo json_encode(["message" => "All fields are required"]);
+        return;
+    }
+
+    // Check if the post belongs to the user
+    $query = "SELECT user_id FROM posts WHERE post_id = :post_id";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(":post_id", $data['post_id']);
+    $stmt->execute();
+    $post = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$post || $post['user_id'] != $data['user_id']) {
+        http_response_code(403);
+        echo json_encode(["message" => "You are not authorized to update this post"]);
+        return;
+    }
+
+    // Update the post
+    $query = "UPDATE posts SET content = :content, mood_score = :mood_score, mood_id = :mood_id, is_posted = :is_posted, post_date = :post_date, updated_at = :updated_at WHERE post_id = :post_id";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(":content", $data['content']);
+    $stmt->bindParam(":mood_score", $data['mood_score']);
+    $stmt->bindParam(":mood_id", $data['mood_id']);
+    $stmt->bindParam(":is_posted", $data['is_posted']);
+    $stmt->bindParam(":post_date", $data['post_date']);
+    $stmt->bindParam(":updated_at", $data['updated_at']);
+    $stmt->bindParam(":post_id", $data['post_id']);
+
+    if ($stmt->execute()) {
+        http_response_code(200);
+        echo json_encode(["message" => "Post updated successfully"]);
+    } else {
+        http_response_code(400);
+        echo json_encode(["message" => "Error updating post"]);
+    }
+}
+
 function getPosts($db) {
     if (empty($_GET['user_id'])) {
         http_response_code(400);
@@ -103,7 +147,7 @@ function getPosts($db) {
             posts.content AS description, 
             posts.post_date AS date, 
             posts.mood_score, 
-            posts.created_at AS time 
+            posts.updated_at AS time 
         FROM 
             posts
         INNER JOIN users ON posts.user_id = users.user_id
@@ -122,30 +166,6 @@ function getPosts($db) {
     $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
     http_response_code(200);
     echo json_encode($posts);
-}
-
-function updatePost($db) {
-    $data = json_decode(file_get_contents("php://input"), true);
-  
-    if (empty($data['post_id']) || empty($data['content']) || empty($data['mood_score'])) {
-        http_response_code(400);
-        echo json_encode(["message" => "All fields are required"]);
-        return;
-    }
-  
-    $query = "UPDATE posts SET content = :content, mood_score = :mood_score WHERE post_id = :post_id";
-    $stmt = $db->prepare($query);
-    $stmt->bindParam(":content", $data['content']);
-    $stmt->bindParam(":mood_score", $data['mood_score']);
-    $stmt->bindParam(":post_id", $data['post_id']);
-  
-    if ($stmt->execute()) {
-        http_response_code(200);
-        echo json_encode(["message" => "Post updated successfully"]);
-    } else {
-        http_response_code(400);
-        echo json_encode(["message" => "Error updating post"]);
-    }
 }
 
 function deletePost($db) {
